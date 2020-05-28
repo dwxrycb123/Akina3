@@ -19,18 +19,9 @@ async def callme(session: CommandSession, user: User, group: Group):
     await session.send('好的，{}，请多指教！'.format(nickname))
 
 @callme.args_parser
+@args_pattern_parser(patterns)
 async def _(session: CommandSession):
-    stripped_arg = session.current_arg_text.strip()
-    print(stripped_arg)
-    if not stripped_arg:
-        session.finish('名字不能是空串哦')
-    else:
-        if stripped_arg:
-            if len(stripped_arg) > 20:
-                session.finish('你的名字太长了！秋菜酱是记不住的')
-            else:
-                session.state['nickname'] = stripped_arg 
-        return 
+    pass
     
 
 

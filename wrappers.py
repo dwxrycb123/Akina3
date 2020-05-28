@@ -5,6 +5,7 @@ from database.tables import *
 from models.model import *
 from config import *
 from util import *
+from typing import List, Callable
 
 from functools import wraps
 
@@ -14,7 +15,7 @@ def normal_command(command_name: str, only_in_group: bool=False) -> callable:
     only_in_group: bool=False, whether the command is only activated in group environment 
     """
 
-    def deco(func:callable):
+    def deco(func: callable):
         @wraps(func)
         async def wrapped_func(session: CommandSession):
             # print("raw msg: {}".format(session.event.raw_message))
@@ -50,3 +51,27 @@ def normal_command(command_name: str, only_in_group: bool=False) -> callable:
         return wrapped_func
     
     return deco 
+
+def args_pattern_parser(patterns: List[ArgPattern]):
+    """
+    patterns: all the patterns of the commands, a list of ArgPattern instances
+    """
+    def deco(func: callable):
+        @wraps(func)
+        async def wrapped_func(session: CommandSession):
+            stripped_arg = session.current_arg_text.strip()
+            print('stripped_arg={}'.format(stripped_arg))
+
+            for p in patterns:
+                result = p.parse(stripped_arg)
+                if result is not None:
+                    session.state["result"] = result
+                    
+                    await func(session)
+                    return 
+            
+            session.finish(ARGUMENT_ERROR_MSG)
+        
+        return wrapped_func
+    
+    return deco

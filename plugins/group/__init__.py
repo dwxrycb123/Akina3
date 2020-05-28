@@ -22,15 +22,7 @@ async def group(session: CommandSession, user: User, group: Group):
 
 
 @group.args_parser
+@args_pattern_parser(patterns)
 async def _(session: CommandSession):
-    stripped_arg = session.current_arg_text.strip()
-    print('stripped_arg={}'.format(stripped_arg))
-    for p in patterns:
-        result = p.parse(stripped_arg)
-        if result is not None:
-            session.state["result"] = result
-            return 
-    session.finish(ARGUMENT_ERROR_MSG)
-    return 
-
+    pass
 
