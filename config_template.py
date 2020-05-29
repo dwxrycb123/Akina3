@@ -70,4 +70,4 @@ CD_CMD = {
     "lottery": 120
 }
 
-GROUP_INFORMED = [680249834]
+GROUP_INFORMED = []
