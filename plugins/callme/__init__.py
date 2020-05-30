@@ -17,12 +17,3 @@ async def callme(session: CommandSession, user: User, group: Group):
     await user.set('nickname', nickname)
 
     await session.send('好的，{}，请多指教！'.format(nickname))
-
-@callme.args_parser
-@args_pattern_parser(patterns)
-async def _(session: CommandSession):
-    pass
-    
-
-
-
