@@ -311,6 +311,13 @@ async def send_msg_with_delay(session:CommandSession, msg:str):
     await session.send(m)
     return 
 
+async def usr_group_send_msg_with_delay(user, group, msg):
+    if group is not None:
+        await send_group_msg_with_delay(group.group_id, msg)
+        return 
+    await send_usr_msg_with_delay(user.uesr_id, msg)
+    
+
 async def send_group_msg_with_delay(group_id:int, msg:str):
     if '$w' not in msg:
         await nonebot._bot.send_group_msg(group_id=group_id, message=msg)
@@ -322,10 +329,21 @@ async def send_group_msg_with_delay(group_id:int, msg:str):
     await nonebot._bot.send_group_msg(group_id=group_id, message=msg[-1])
     return
 
+async def send_usr_msg_with_delay(user_id:int, msg:str):
+    if '$w' not in msg:
+        await nonebot._bot.send_private_msg(user_id=user_id, message=msg)
+        return 
+    msg = msg.split('$w')
+    for m in msg[:-1]:
+        await nonebot._bot.send_private_msg(user_id=user_id, message=m)
+        await asyncio.sleep(1.4)
+    await nonebot._bot.send_private_msg(user_id=user_id, message=msg[-1])
+    return
+
 def record_and_check_operation(user_id:int, operation:str, msg:str):
-    print('_____BLOCK_OFF_____:{}'.format(BLOCK_OFF))
+    # print('_____BLOCK_OFF_____:{}'.format(BLOCK_OFF))
     ts = time.time()
-    print("ts={}".format(ts))
+    # print("ts={}".format(ts))
     _current = {
             "operation": operation,
             "message": msg,
@@ -402,21 +420,18 @@ def check_CD(user_id:int, operation:str):
             return False 
     return True
 
-async def check_auth_cd_times(user_id, group_id, auth_needed, cmd_name):
-    user = await User().getUser(user_id)
+async def check_cd_times(user, group, cmd_name):
     if not await check_cmd_times(user, cmd_name):
-        await nonebot._bot.send_group_msg(group_id=group_id, message=TIMES_UP_MSG)
+        await nonebot._bot.send_group_msg(group_id=group.group_id, message=TIMES_UP_MSG)
         return False
-    if not check_CD(user_id, cmd_name):
-        await nonebot._bot.send_group_msg(group_id=group_id, message="该命令存在{}秒冷却时间，请稍后尝试x".format(CMD_CD[cmd_name]))
+    if not check_CD(user.user_id, cmd_name):
+        await nonebot._bot.send_group_msg(group_id=group.group_id, message="该命令存在{}秒冷却时间，请稍后尝试x".format(CMD_CD[cmd_name]))
         return False
-    if not record_and_check_operation(user_id, cmd_name, ""):
+    if not record_and_check_operation(user.user_id, cmd_name, ""):
         return False
-    return user
+    return True
 
-async def check_auth(user_id, group_id, auth_needed):
-    user = await User().getUser(user_id)
-    group = await Group().getGroup(group_id)
-    if user.auth < auth_needed and group.auth < auth_needed and user_id not in SUPERUSERS:
+async def check_auth(user, group, auth_needed):
+    if user.auth < auth_needed and group.auth < auth_needed and user.user_id not in SUPERUSERS:
         return False
     return True

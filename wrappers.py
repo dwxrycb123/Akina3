@@ -1,4 +1,5 @@
 from nonebot import on_command, CommandSession, argparse
+import aiocqhttp
 
 from database.mysql import * 
 from database.tables import *
@@ -71,6 +72,46 @@ def args_pattern_parser(patterns: List[ArgPattern]):
                     return 
             
             session.finish(ARGUMENT_ERROR_MSG)
+        
+        return wrapped_func
+    
+    return deco
+
+def global_command(command_name: str, aliases: List[str], only_in_group: bool=False) -> callable:
+    """
+    command_name: str, the name of the command, used to get information like CD time or the calling times limit \
+    only_in_group: bool=False, whether the command is only activated in group environment 
+    """
+
+    def deco(func: callable):
+        @wraps(func)
+        async def wrapped_func(event: aiocqhttp.Event):
+            group = None 
+            user = await User().getUser(event['user_id'])
+
+            if only_in_group and event.detail_type != 'group':
+                print("command {}: not a group message, ignore (since only_group=True)")
+                return 
+            if event.detail_type == 'group':
+                group = await Group().getGroup(event.group_id)
+            
+            is_called = False
+            msg = str(event['message'])
+            for s in aliases + [head + command_name for head in COMMAND_START]:
+                if msg[:len(s)] == s:
+                    is_called = True
+                    msg = msg[len(s):]
+                    break 
+            
+            cd_check = await check_cd_times(user, group, command_name)
+            if not cd_check:
+                return 
+            auth_check = await check_auth(user, group, CMD_AUTH[command_name])
+            if not auth_check:
+                await usr_group_send_msg_with_delay(user, group, LOW_AUTH_MSG)
+                return 
+            
+            await func(event, user, group)
         
         return wrapped_func
     
