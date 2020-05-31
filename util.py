@@ -409,7 +409,10 @@ def record_and_check_operation(user_id:int, operation:str, msg:str):
     
     return True
 
-def check_CD(user_id:int, operation:str):
+def check_CD(user:User, operation:str):
+    user_id = user.user_id
+    if user_id in SUPERUSERS:
+        return True
     ts = time.time()
     if operation not in CMD_CD:
         return True 
@@ -424,7 +427,7 @@ async def check_cd_times(user, group, cmd_name):
     if not await check_cmd_times(user, cmd_name):
         await nonebot._bot.send_group_msg(group_id=group.group_id, message=TIMES_UP_MSG)
         return False
-    if not check_CD(user.user_id, cmd_name):
+    if not check_CD(user, cmd_name):
         await nonebot._bot.send_group_msg(group_id=group.group_id, message="该命令存在{}秒冷却时间，请稍后尝试x".format(CMD_CD[cmd_name]))
         return False
     if not record_and_check_operation(user.user_id, cmd_name, ""):

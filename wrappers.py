@@ -35,7 +35,7 @@ def normal_command(command_name: str, only_in_group: bool=False) -> callable:
                 session.send(TIMES_UP_MSG)
                 return False
             
-            if not check_CD(user.user_id, command_name):
+            if not check_CD(user, command_name):
                 await session.send(IN_CD_MSG.format(CMD_CD[command_name]))
                 return 
             
@@ -104,6 +104,9 @@ def global_command(command_name: str, aliases: List[str], only_in_group: bool=Fa
                     break 
             
             if not is_called:
+                return 
+
+            if msg.strip() != "":
                 return 
             
             cd_check = await check_cd_times(user, group, command_name)
