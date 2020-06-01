@@ -67,7 +67,7 @@ async def answer(event: aiocqhttp.Event):
 
 
     name = user.nickname if user.nickname != NO_NICKNAME else event['sender']['nickname']
-    text = c['answer'].replace('$s', name)
+    text = c['answer'].replace('$s', name).replace('\s', ' ')
     
     # await nonebot._bot.send_group_msg(group_id=group_id, message=text)
     await send_group_msg_with_delay(group_id, text)
