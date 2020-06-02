@@ -12,6 +12,7 @@ import os, sys
 sys.path.append(os.path.dirname(__file__))
 from search import *
 
+# -o --only_answer ; do not update question_info when receive this flag
 async def edit(result, session):
     teach_info_ = dict()
     question_info_ = dict()

@@ -39,6 +39,7 @@ async def search_by_Q_or_A(string, env=None):
         'answer': string,
         'env': env
     })
+    '''
     if env != 'global':
         result_q += await table_teach.select_record({
             'question': string,
@@ -47,5 +48,6 @@ async def search_by_Q_or_A(string, env=None):
         result_a += await table_teach.select_record({
             'answer': string
         })
+    '''
     return result_q, result_a
 
