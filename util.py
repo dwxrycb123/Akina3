@@ -342,6 +342,9 @@ async def send_usr_msg_with_delay(user_id:int, msg:str):
 
 def record_and_check_operation(user_id:int, operation:str, msg:str):
     # print('_____BLOCK_OFF_____:{}'.format(BLOCK_OFF))
+    if user_id in SUPERUSERS:
+        return True
+    
     ts = time.time()
     # print("ts={}".format(ts))
     _current = {
