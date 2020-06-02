@@ -14,6 +14,7 @@ import numpy as np
 
 @nonebot._bot.on_message
 async def answer(event: aiocqhttp.Event):
+    # keywords like '抽！' also has to be considered, maybe we can write a commandController to register these things automatically
     if str(event['message']) == '单次抽卡':
         return 
     if event.detail_type != 'group':
@@ -40,24 +41,37 @@ async def answer(event: aiocqhttp.Event):
     
 
     Qs = await table_question_info.select_record({
-        'question': msg
+        'question': msg,
+        'env': group_id
     })
+    Qs += await table_question_info.select_record({
+        'question': msg,
+        'env': 'global' 
+    })
+
     print(Qs)
     if not len(Qs):
         return 
-    Qs = Qs[0]
+    Q_prob = np.array([float(q['prob']) for q in Qs])
+    Q_prob /= Q_prob.sum()
+    Qs = np.random.choice(Qs, p=Q_prob)
     if random.uniform(0, 1) >= float(Qs['prob']):
         return 
+    _env = Qs['env']
     
     As = await table_teach.select_record({
         'question': msg,
-        'env': 'global'
-    })
-    As += await table_teach.select_record({
-        'question': msg,
-        'env': str(group_id)
+        'env': _env
     })
     print(As)
+
+    if not len(As):
+        await table_question_info.delete_record({
+            'question': msg,
+            'env': _env
+        })
+        print('the question has no answer, thus has been deleted.')
+        return 
 
     p = np.array([float(x['prob']) for x in As])
     p /= p.sum()
