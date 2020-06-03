@@ -18,8 +18,8 @@ from delete import *
 from edit import *
 # '<question:str> <answer:str> [-p|--answer_prob:float] [-P|--question_prob:float] [-a|--anonymous]'
 pattern_QA = ArgPattern('QA', '<question:str> <answer:str> [-g|--global] [-p|--answer_probability:float] [-P|--question_probability:float] [-a|--anonymous]')
-pattern_edit = ArgPattern('Edit', '(-e|--edit) <index:int> [-g|--global] [-A|--answer:str] [-Q|--question:str]  [-p|--answer_probability:float] [-P|--question_probability:float]')
-pattern_query_QA = ArgPattern('Query_QA', '(-q|--query) <question_or_answer:str> [-k|--keyword]')
+pattern_edit = ArgPattern('Edit', '(-e|--edit) <index:int> [-g|--global] [-A|--answer:str] [-Q|--question:str]  [-p|--answer_probability:float] [-P|--question_probability:float] [-s|--single:bool]')
+pattern_query_QA = ArgPattern('Query_QA', '(-q|--query) <question_or_answer:str> [-k|--keyword] [-Q|--question]')
 pattern_delete_id = ArgPattern('Delete_id', '(-d|--delete) <index:int>')
 
 patterns = [pattern_QA, pattern_edit, pattern_query_QA, pattern_delete_id]
@@ -39,7 +39,10 @@ async def teach(session: CommandSession, user: User, group: Group):
         await edit(result, session)
         return 
     if result['name'] == 'Query_QA':
-        await query(result, session)
+        if result['question']:
+            await query_q(result, session)
+        else:
+            await query_qa(result, session)
         return 
     if result['name'] == 'Delete_id':
         await delete(result, session)

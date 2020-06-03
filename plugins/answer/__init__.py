@@ -39,7 +39,6 @@ async def answer(event: aiocqhttp.Event):
     if group.auth < ANSWER_AUTH:
         return 
     
-
     Qs = await table_question_info.select_record({
         'question': msg,
         'env': group_id
@@ -52,26 +51,32 @@ async def answer(event: aiocqhttp.Event):
     print(Qs)
     if not len(Qs):
         return 
-    Q_prob = np.array([float(q['prob']) for q in Qs])
-    Q_prob /= Q_prob.sum()
-    Qs = np.random.choice(Qs, p=Q_prob)
-    if random.uniform(0, 1) >= float(Qs['prob']):
-        return 
-    _env = Qs['env']
-    
-    As = await table_teach.select_record({
-        'question': msg,
-        'env': _env
-    })
-    print(As)
 
-    if not len(As):
-        await table_question_info.delete_record({
+
+    while(True):
+        Q_prob = np.array([float(q['prob']) for q in Qs])
+        Q_prob /= Q_prob.sum()
+        Qs_idx = np.random.choice(range(len(Qs)), p=Q_prob)
+        _Qs = Qs[Qs_idx]
+        if random.uniform(0, 1) >= float(_Qs['prob']):
+            return 
+        _env = _Qs['env']
+        
+        As = await table_teach.select_record({
             'question': msg,
             'env': _env
         })
-        print('the question has no answer, thus has been deleted.')
-        return 
+        print(As)
+
+        if not len(As):
+            await table_question_info.delete_record({
+                'question': msg,
+                'env': _env
+            })
+            print('the question has no answer, thus has been deleted.')
+            del Qs[Qs_idx]
+        else:
+            break
 
     p = np.array([float(x['prob']) for x in As])
     p /= p.sum()

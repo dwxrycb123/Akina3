@@ -11,6 +11,7 @@ import datetime
 import os, sys
 sys.path.append(os.path.dirname(__file__))
 from search import *
+from question_info import *
 
 async def add_QA(result, session):
         if not result['answer_probability']:
@@ -32,11 +33,8 @@ async def add_QA(result, session):
             'create_date': datetime.datetime.now().strftime("%Y-%m-%d"),
             'author_id': session.event.user_id if not result['anonymous'] else 0
         })
-        ret = await table_question_info.add_record({
-            'question': result['question'],
-            'env': env,
-            'prob': 1.0 if not result['question_probability'] else result['question_probability']
-        })
+
+        await question_info_safe_update(result['question'], env, result['question_probability'] or 1.0)
 
         new_id = await search_by_QA(result['question'], result['answer'], env)
         new_id = new_id[0]['id']

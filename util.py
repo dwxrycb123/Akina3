@@ -29,6 +29,8 @@ async def get_auth_and_user(session: CommandSession):
     return auth, user
 
 async def check_cmd_times(user: User, command_name: str):
+    if command_name in SUPERUSER_NO_TIMES_CMD and user.user_id in SUPERUSERS:
+        return True
     if command_name not in CMD_TIMES:
         return True
     current_times = getattr(user, command_name) 

@@ -32,7 +32,7 @@ def normal_command(command_name: str, only_in_group: bool=False) -> callable:
             command_auth = CMD_AUTH[command_name]
 
             if not await check_cmd_times(user, command_name):
-                session.send(TIMES_UP_MSG)
+                await session.send(TIMES_UP_MSG)
                 return False
             
             if not check_CD(user, command_name):

@@ -51,3 +51,9 @@ async def search_by_Q_or_A(string, env=None):
     '''
     return result_q, result_a
 
+async def search_Q(string, env=None):
+    result_q = await table_question_info.select_record({
+        'question' : string,
+        'env': env
+    })
+    return result_q

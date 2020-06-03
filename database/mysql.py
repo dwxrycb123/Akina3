@@ -218,6 +218,7 @@ class Table():
 
         args = tuple(args)   
         print('update {} set {} where {}'.format(self.table_name, cont_str, cond_str))     
+        print(args)
         await self.database.execute('update {} set {} where {}'.format(self.table_name, cont_str, cond_str), args)
     
     async def add_many(self, records):
