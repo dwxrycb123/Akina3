@@ -22,6 +22,6 @@ async def global_alias(event: aiocqhttp.Event):
 
 @global_command("lottery", aliases=["单次抽卡", "单抽", "抽卡", "抽！"], only_in_group=True)
 async def lottery(event: aiocqhttp.Event, user: User, group: Group):
-    c = await give_item(user.user_id)
-    _msg = msg_of_lottery(user.nickname, c)
+    c, is_first = await give_item(user.user_id)
+    _msg = msg_of_lottery(user.nickname, c, is_first)
     await usr_group_send_msg_with_delay(user, group, _msg + '\n' + format(c['description']))

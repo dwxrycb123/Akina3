@@ -29,11 +29,16 @@ async def give_item(user_id):
     user_info = await get_info(user_id)
     if str(c["id"]) in user_info['items']:
         user_info['items'][str(c['id'])] += 1
+        is_first = False
     else:
         user_info['items'][str(c['id'])] = 1
+        is_first = True
     await save_info(user_id, user_info)
-    return c
+    return c, is_first
 
-def msg_of_lottery(nickname, item):
-    msg = "恭喜 {} 获得 {}({}) ！".format(nickname, item['name'], item['rarity'])
+def msg_of_lottery(nickname, item, is_first):
+    raw_msg = "恭喜 {} 获得 {}({}) ！"
+    if is_first:
+        raw_msg = "恭喜 {} 获得了新物品 {}({})！"
+    msg = raw_msg.format(nickname, item['name'], item['rarity'])
     return msg
