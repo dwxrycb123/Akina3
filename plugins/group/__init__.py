@@ -12,7 +12,7 @@ pattern_set_authority = ArgPattern('set_authority', '(-a|--authority) <index:int
 patterns = [pattern_set_authority]
 
 @on_command('group', aliases=('群权限',), only_to_me=False)
-@normal_command('weather', only_in_group=True)
+@normal_command('group', only_in_group=True)
 async def group(session: CommandSession, user: User, group: Group):
     result = session.get('result')
     if result['name'] == 'set_authority':
